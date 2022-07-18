@@ -6,6 +6,7 @@ Route.group(() => {
       return { hello: 'user' }
     })
     Route.post('/signup', 'UsuariosController.signup')
+    Route.post('/login', 'UsuariosController.login')
   }).prefix('/usuarios')
 }).prefix('api')
 export default Route

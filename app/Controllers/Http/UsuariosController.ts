@@ -1,6 +1,7 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import SignupUsuarioValidator from 'App/Validators/SignupUsuarioValidator'
 import CreateEntidadeValidator from 'App/Validators/CreateEntidadeValidator'
+import LoginValidator from 'App/Validators/LoginValidator'
 import Entidade from 'App/Models/Entidade'
 import User from 'App/Models/Usuario'
 
@@ -40,5 +41,14 @@ export default class UsuariosController {
         await entidade.delete()
       }
     }
+  }
+
+  public async login({ response, request, auth }: HttpContextContract) {
+    const payload = await request.validate(LoginValidator)
+    const user = await User.findBy('login', payload.login)
+    delete user.password
+    const result = await auth.use('jwt').login(user, payload)
+    const jwt = await auth.use('jwt').generate(user)
+    response.status(200).json({ jwt, user })
   }
 }
