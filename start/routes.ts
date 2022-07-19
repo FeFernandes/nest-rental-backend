@@ -21,6 +21,7 @@
 import Route from '@ioc:Adonis/Core/Route'
 import 'App/Modules/Usuario/routes'
 import 'App/Modules/Categoria/routes'
+import 'App/Modules/RedeSocial/routes'
 Route.get('/', async () => {
   return { hello: 'world' }
 })
