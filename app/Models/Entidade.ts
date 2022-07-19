@@ -1,4 +1,5 @@
-import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, column, hasOne, HasOne } from '@ioc:Adonis/Lucid/Orm'
+import Usuario from 'App/Models/Usuario'
 
 export default class Entidade extends BaseModel {
   @column({ isPrimary: true })
@@ -24,4 +25,9 @@ export default class Entidade extends BaseModel {
 
   @column()
   public email: string
+
+  @hasOne(() => Usuario, {
+    foreignKey: 'id_entidade',
+  })
+  public usuario: HasOne<typeof Usuario>
 }

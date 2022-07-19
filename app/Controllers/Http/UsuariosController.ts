@@ -1,28 +1,93 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import SignupUsuarioValidator from 'App/Validators/SignupUsuarioValidator'
-import CreateEntidadeValidator from 'App/Validators/CreateEntidadeValidator'
-import LoginValidator from 'App/Validators/LoginValidator'
+import CreateUsuarioValidator from 'App/Validators/Usuarios/CreateUsuarioValidator'
+import CreateEntidadeValidator from 'App/Validators/Usuarios/CreateEntidadeValidator'
+import EditEntidadeValidator from 'App/Validators/Usuarios/EditEntidadeValidator'
+import LoginValidator from 'App/Validators/Usuarios/LoginValidator'
+import UsuarioShowValidator from 'App/Validators/Usuarios/UsuarioShowValidator'
+import UsuarioDeleteValidator from 'App/Validators/Usuarios/UsuarioDeleteValidator'
+import EditUsuarioValidator from 'App/Validators/Usuarios/EditUsuarioValidator'
 import Entidade from 'App/Models/Entidade'
-import User from 'App/Models/Usuario'
+import Usuario from 'App/Models/Usuario'
 
 export default class UsuariosController {
-  public async index(ctx: HttpContextContract) {}
-  public async create(ctx: HttpContextContract) {}
-  public async show(ctx: HttpContextContract) {}
-  public async edit(ctx: HttpContextContract) {}
-  public async destroy(ctx: HttpContextContract) {}
+  public async index({ response }: HttpContextContract) {
+    const users = await Entidade.query().preload('usuario')
+    response.status(200).json(users)
+  }
+  public async show({ response, request }: HttpContextContract) {
+    const payload = await request.validate(UsuarioShowValidator)
+    const user = await Usuario.find(payload.params.id)
 
-  public async signup({ response, request }: HttpContextContract) {
+    if (user) {
+      const entidade = await Entidade.find(user.id_entidade)
+      response.status(202).json({
+        entidade: entidade.$attributes,
+        usuario: user.$attributes,
+      })
+    } else {
+      response.status(404).json({
+        message: 'Not found',
+      })
+    }
+  }
+  public async edit({ response, request }: HttpContextContract) {
+    const payloadUser = await request.validate(EditUsuarioValidator)
+    const user = await Usuario.find(payloadUser.params.id)
+
+    if (user) {
+      const payloadEntidade = await request.validate(EditEntidadeValidator)
+      const entidade = await Entidade.find(user.id_entidade)
+      await user
+        .merge({
+          id_perfil: user.id_perfil,
+          password: user.password,
+          login: user.login,
+        })
+        .save()
+      await entidade
+        .merge({
+          ...payloadEntidade,
+        })
+        .save()
+
+      response.status(202).json({
+        entidade: entidade.$attributes,
+        usuario: user.$attributes,
+      })
+    } else {
+      response.status(404).json({
+        message: 'Not found',
+      })
+    }
+  }
+  public async destroy({ response, request }: HttpContextContract) {
+    const payload = await request.validate(UsuarioDeleteValidator)
+    const user = await Usuario.findOrFail(payload.params.id)
+
+    if (user && user.id_perfil === 1) {
+      const entidade = await Entidade.find(user.id_entidade)
+      await user.delete()
+      await entidade.delete()
+      response.status(200).json({
+        status: true,
+      })
+    } else {
+      response.status(404).json({
+        message: 'Not found',
+      })
+    }
+  }
+
+  public async create({ response, request }: HttpContextContract) {
     let entidade = new Entidade()
     try {
       const payloadEntidade = await request.validate(CreateEntidadeValidator)
-      const payloadUser = await request.validate(SignupUsuarioValidator)
+      const payloadUser = await request.validate(CreateUsuarioValidator)
 
       entidade = await Entidade.create(payloadEntidade)
       if (entidade.$isPersisted) {
-        const user = await User.create({
+        const user = await Usuario.create({
           ...payloadUser,
-          id_perfil: 1,
           id_entidade: entidade.id,
         })
         if (user.$isPersisted) {
@@ -45,7 +110,7 @@ export default class UsuariosController {
 
   public async login({ response, request, auth }: HttpContextContract) {
     const payload = await request.validate(LoginValidator)
-    const user = await User.findBy('login', payload.login)
+    const user = await Usuario.findBy('login', payload.login)
     delete user.password
     const result = await auth.use('jwt').login(user, payload)
     const jwt = await auth.use('jwt').generate(user)

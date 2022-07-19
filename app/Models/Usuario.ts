@@ -1,5 +1,5 @@
 import Hash from '@ioc:Adonis/Core/Hash'
-import { BaseModel, column, hasOne, HasOne, beforeSave } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, column, beforeSave } from '@ioc:Adonis/Lucid/Orm'
 import Entidade from 'App/Models/Entidade'
 import Perfil from 'App/Models/Perfil'
 
@@ -18,12 +18,6 @@ export default class Usuario extends BaseModel {
 
   @column()
   public id_perfil: number
-
-  @hasOne(() => Entidade)
-  public entidade: HasOne<typeof Entidade>
-
-  @hasOne(() => Perfil)
-  public perfil: HasOne<typeof Perfil>
 
   @beforeSave()
   public static async hashPassword(user: Usuario) {
