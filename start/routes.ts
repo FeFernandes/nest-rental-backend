@@ -24,6 +24,7 @@ import 'App/Modules/Categoria/routes'
 import 'App/Modules/RedeSocial/routes'
 import 'App/Modules/Produto/routes'
 import 'App/Modules/Visita/routes'
+import 'App/Modules/Banner/routes'
 Route.get('/', async () => {
   return { hello: 'world' }
 })
