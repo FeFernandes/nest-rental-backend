@@ -25,6 +25,7 @@ import 'App/Modules/RedeSocial/routes'
 import 'App/Modules/Produto/routes'
 import 'App/Modules/Visita/routes'
 import 'App/Modules/Banner/routes'
+import 'App/Modules/Endereco/routes'
 Route.get('/', async () => {
   return { hello: 'world' }
 })
