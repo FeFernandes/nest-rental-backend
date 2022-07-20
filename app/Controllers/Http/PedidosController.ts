@@ -1,43 +1,47 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import CreateValidator from 'App/Validators/Produtos/CreateValidator'
-import ShowValidator from 'App/Validators/Produtos/ShowValidator'
-import DeleteValidator from 'App/Validators/Produtos/DeleteValidator'
-import EditValidator from 'App/Validators/Produtos/EditValidator'
-import Produto from 'App/Models/Produto'
+import CreateValidator from 'App/Validators/Pedidos/CreateValidator'
+import ShowValidator from 'App/Validators/Pedidos/ShowValidator'
+import DeleteValidator from 'App/Validators/Pedidos/DeleteValidator'
+import EditValidator from 'App/Validators/Pedidos/EditValidator'
+import Pedido from 'App/Models/Pedido'
+import PedidoItem from 'App/Models/PedidoItem'
 
-export default class ProdutosController {
+export default class PedidosController {
   public async index({ response }: HttpContextContract) {
-    const categories = await Produto.all()
-    response.status(200).json(categories)
+    const pedidos = await Pedido.query().preload('itens').paginate(1, 100)
+    response.status(202).json(pedidos.toJSON())
   }
   public async show({ response, request }: HttpContextContract) {
     const payload = await request.validate(ShowValidator)
-    const social = await Produto.find(payload.params.id)
-
-    if (social) {
-      response.status(202).json({
-        ...social.$attributes,
-      })
-    } else {
-      response.status(404).json({
-        message: 'Not found',
-      })
-    }
+    const pedidos = await Pedido.query()
+      .where('id', payload.params.id)
+      .preload('itens')
+      .firstOrFail()
+    response.status(202).json(pedidos.toJSON())
   }
   public async edit({ response, request }: HttpContextContract) {
     const payload = await request.validate(EditValidator)
-    const social = await Produto.find(payload.params.id)
+    const ID = payload.params.id
+    const pedido = await Pedido.find(ID)
 
-    if (social) {
+    if (pedido) {
+      const items = payload.itens
+      const dataInicio = payload.data_inicio
+      const dataEntrega = payload.data_entrega
       delete payload.params
-      await social
+      delete payload.itens
+      await pedido
         .merge({
           ...payload,
+          data_inicio: `${dataInicio.toSQLDate()} 00:00:00`,
+          data_entrega: `${dataEntrega.toSQLDate()} 00:00:00`,
         })
         .save()
-
+      await PedidoItem.query().where('id_pedido', ID).delete()
+      const resultItens = await pedido.related('itens').createMany(items)
       response.status(202).json({
-        ...social.$attributes,
+        ...pedido.toJSON(),
+        itens: resultItens,
       })
     } else {
       response.status(404).json({
@@ -47,10 +51,11 @@ export default class ProdutosController {
   }
   public async destroy({ response, request }: HttpContextContract) {
     const payload = await request.validate(DeleteValidator)
-    const social = await Produto.findOrFail(payload.params.id)
+    const pedido = await Pedido.findOrFail(payload.params.id)
 
-    if (social) {
-      await social.delete()
+    if (pedido) {
+      await PedidoItem.query().where('id_pedido', payload.params.id).delete()
+      await pedido.delete()
       response.status(200).json({
         status: true,
       })
@@ -62,17 +67,27 @@ export default class ProdutosController {
   }
 
   public async create({ response, request }: HttpContextContract) {
-    let social = new Produto()
+    let pedido = new Pedido()
     try {
       const payload = await request.validate(CreateValidator)
-
-      social = await Produto.create(payload)
-      if (social.$isPersisted) {
+      const items = payload.itens
+      const dataInicio = payload.data_inicio
+      const dataEntrega = payload.data_entrega
+      delete payload.itens
+      pedido = await Pedido.create({
+        ...payload,
+        data_inicio: `${dataInicio.toSQLDate()} 00:00:00`,
+        data_entrega: `${dataEntrega.toSQLDate()} 00:00:00`,
+      })
+      if (pedido.$isPersisted) {
+        const itensResult = await pedido.related('itens').createMany(items)
         response.status(202).json({
-          ...social.$attributes,
+          ...pedido.$attributes,
+          itens: itensResult,
         })
       }
     } catch (error) {
+      pedido.delete()
       response.badRequest(error.messages)
     }
   }

@@ -25,11 +25,25 @@ export default class CreateCategoriaValidator {
    */
   public schema = schema.create({
     descricao: schema.string(),
-    nome: schema.string(),
-    fabricante: schema.string.nullableAndOptional(),
-    valor: schema.number(),
-    vr_desconto: schema.number.nullableAndOptional(),
-    id_categoria: schema.number.nullableAndOptional(),
+    data_inicio: schema.date({
+      format: 'sql',
+    }),
+    data_entrega: schema.date({
+      format: 'sql',
+    }),
+    id_endereco: schema.number.nullableAndOptional(),
+    id_cupom_desconto: schema.number.nullableAndOptional(),
+    id_cliente: schema.number.nullableAndOptional(),
+    id_usuario: schema.number(),
+    vr_total: schema.number(),
+    itens: schema.array().members(
+      schema.object().members({
+        id_produto: schema.number(),
+        valor: schema.number(),
+        vr_desconto: schema.number(),
+        quantidade: schema.number(),
+      })
+    ),
   })
 
   /**
