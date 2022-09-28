@@ -118,7 +118,7 @@ export default class UsuariosController {
 
     const valid = await Hash.verify(user.password, password);
     if(!valid)
-      return response.status(403).json("Senha inválida!");
+      return response.status(403).json({message:"Senha inválida!"});
 
     const token = await auth.use('jwt').generate(user);
 
