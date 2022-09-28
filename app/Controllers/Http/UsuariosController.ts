@@ -114,7 +114,7 @@ export default class UsuariosController {
     const user = await Usuario.findBy('login', login);
 
     if(!user)
-      return response.status(403).json("Usuário não existe!");
+      return response.status(403).json({message:"Usuário não existe!"});
 
     const valid = await Hash.verify(user.password, password);
     if(!valid)
