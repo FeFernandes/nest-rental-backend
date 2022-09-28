@@ -9,6 +9,7 @@ import Estado from 'App/Models/Estado'
 import Cidade from 'App/Models/Cidade'
 import Endereco from 'App/Models/Endereco'
 import EntidadesEndereco from 'App/Models/EntidadesEndereco'
+import Database from '@ioc:Adonis/Lucid/Database'
 
 export default class EnderecosController {
   public async estados({ response }: HttpContextContract) {
@@ -41,6 +42,12 @@ export default class EnderecosController {
     } else {
       response.status(404).json({ message: 'Not found' })
     }
+  }
+
+
+  public async index({ response, request }: HttpContextContract) {
+    const [enderecos, info] = await Database.rawQuery('select * from enderecos join entidades_enderecos on id_endereco = enderecos.id where id_entidade = ?', [104])
+    response.status(200).json(enderecos)
   }
 
   public async show({ response, request }: HttpContextContract) {
