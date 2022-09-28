@@ -14,6 +14,12 @@ export default class Produto extends BaseModel {
   public fabricante: string | null
 
   @column()
+  public identificador: string | null
+
+  @column()
+  public prod_image: string | null
+
+  @column()
   public valor: number
 
   @column()
