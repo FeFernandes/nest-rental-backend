@@ -8,6 +8,7 @@ import UsuarioDeleteValidator from 'App/Validators/Usuarios/UsuarioDeleteValidat
 import EditUsuarioValidator from 'App/Validators/Usuarios/EditUsuarioValidator'
 import Entidade from 'App/Models/Entidade'
 import Usuario from 'App/Models/Usuario'
+import Hash from '@ioc:Adonis/Core/Hash'
 
 export default class UsuariosController {
   public async index({ response }: HttpContextContract) {
@@ -109,11 +110,27 @@ export default class UsuariosController {
   }
 
   public async login({ response, request, auth }: HttpContextContract) {
+    const {login, password} = request.all();
+    const user = await Usuario.findBy('login', login);
+
+    if(!user)
+      return response.status(403).json("Usuário não existe!");
+
+    const valid = await Hash.verify(user.password, password);
+    if(!valid)
+      return response.status(403).json("Senha inválida!");
+
+    const token = await auth.use('jwt').generate(user);
+
+    response.json(token);
+
+    /*
     const payload = await request.validate(LoginValidator)
     const user = await Usuario.findBy('login', payload.login)
     delete user.password
     const result = await auth.use('jwt').login(user, payload)
     const jwt = await auth.use('jwt').generate(user)
     response.status(200).json({ jwt, user })
+    */
   }
 }

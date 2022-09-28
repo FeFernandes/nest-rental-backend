@@ -12,5 +12,7 @@ Route.group(() => {
     Route.delete('/:id', 'EnderecosController.destroy')
     Route.put('/:id', 'EnderecosController.edit')
   }).prefix('/enderecos')
+
+  Route.get('/cidades/:nome', 'EnderecosController.cidadePeloNome')
 }).prefix('api')
 export default Route

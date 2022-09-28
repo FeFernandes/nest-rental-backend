@@ -15,6 +15,7 @@ export default class EnderecosController {
     const estados = await Estado.all()
     response.status(200).json(estados)
   }
+
   public async estadoCidade({ response, request }: HttpContextContract) {
     const payload = await request.validate(EstadoCidadesValidator)
     const cidades = await Cidade.query()
@@ -29,6 +30,19 @@ export default class EnderecosController {
       })
     }
   }
+
+  public async cidadePeloNome({ response, request }: HttpContextContract) {
+    const { nome } = request.params();
+    console.log(decodeURI(nome));
+    const cidade = await Cidade.query().where('nome', decodeURI(nome));
+
+    if (cidade?.length == 1) {
+      response.json(cidade[0])
+    } else {
+      response.status(404).json({ message: 'Not found' })
+    }
+  }
+
   public async show({ response, request }: HttpContextContract) {
     const payload = await request.validate(ShowValidator)
     const endereco = await Endereco.find(payload.params.id)
