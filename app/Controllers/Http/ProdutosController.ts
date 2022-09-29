@@ -7,7 +7,7 @@ import Produto from 'App/Models/Produto'
 
 export default class ProdutosController {
   public async index({ response }: HttpContextContract) {
-    const categories = await Produto.all()
+    const categories = await Produto.query().preload('categoria')
     response.status(200).json(categories)
   }
   public async show({ response, request }: HttpContextContract) {

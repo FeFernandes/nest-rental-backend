@@ -9,6 +9,16 @@ import Database from '@ioc:Adonis/Lucid/Database'
 
 export default class PedidosController {
 
+  public async dashboard({ response }: HttpContextContract) {
+    const [linhas] = await Database.rawQuery(
+      ` select pedidos.id, razao_social, email, vr_total, data_inicio, data_entrega
+      from pedidos
+      join entidades on pedidos.id_cliente = entidades.id;
+    `);
+
+    response.status(200).json(linhas)
+  } 
+
   public async total({ response }: HttpContextContract) {
     const [linhasValor] = await Database.rawQuery("select sum(vr_total) as valor_total from pedidos");
     const [linhasResumo] = await Database.rawQuery(

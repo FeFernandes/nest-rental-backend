@@ -1,4 +1,4 @@
-import { BaseModel, column, hasOne, HasOne } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, BelongsTo, belongsTo, column, hasOne, HasOne } from '@ioc:Adonis/Lucid/Orm'
 import Categoria from 'App/Models/Categoria'
 export default class Produto extends BaseModel {
   @column({ isPrimary: true })
@@ -28,8 +28,8 @@ export default class Produto extends BaseModel {
   @column()
   public id_categoria: number | null
 
-  @hasOne(() => Categoria, {
+  @belongsTo(() => Categoria, {
     foreignKey: 'id_categoria',
   })
-  public categoria: HasOne<typeof Categoria>
+  public categoria: BelongsTo<typeof Categoria>
 }
