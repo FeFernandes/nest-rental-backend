@@ -127,17 +127,17 @@ export default class UsuariosController {
     if(!valid)
       return response.status(403).json({message:"Senha inválida!"});
 
-    const token = await auth.use('jwt').generate(user);
+    // const token = await auth.use('jwt').generate(user);
 
-    response.json(token);
+    // response.json(token);
 
-    /*
+
     const payload = await request.validate(LoginValidator)
-    const user = await Usuario.findBy('login', payload.login)
+    // const user = await Usuario.findBy('login', payload.login)
     delete user.password
     const result = await auth.use('jwt').login(user, payload)
     const jwt = await auth.use('jwt').generate(user)
     response.status(200).json({ jwt, user })
-    */
+
   }
 }
