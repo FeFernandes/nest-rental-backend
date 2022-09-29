@@ -9,8 +9,15 @@ import EditUsuarioValidator from 'App/Validators/Usuarios/EditUsuarioValidator'
 import Entidade from 'App/Models/Entidade'
 import Usuario from 'App/Models/Usuario'
 import Hash from '@ioc:Adonis/Core/Hash'
+import Database from '@ioc:Adonis/Lucid/Database'
 
 export default class UsuariosController {
+
+  public async total({ response }: HttpContextContract) {
+    const [total] = await Database.rawQuery("select count(*) total from usuarios;");
+    response.status(200).json(total[0])
+  }
+
   public async index({ response }: HttpContextContract) {
     const users = await Entidade.query().preload('usuario')
     response.status(200).json(users)

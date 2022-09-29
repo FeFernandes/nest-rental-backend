@@ -5,8 +5,27 @@ import DeleteValidator from 'App/Validators/Pedidos/DeleteValidator'
 import EditValidator from 'App/Validators/Pedidos/EditValidator'
 import Pedido from 'App/Models/Pedido'
 import PedidoItem from 'App/Models/PedidoItem'
+import Database from '@ioc:Adonis/Lucid/Database'
 
 export default class PedidosController {
+
+  public async total({ response }: HttpContextContract) {
+    const [linhasValor] = await Database.rawQuery("select sum(vr_total) as valor_total from pedidos");
+    const [linhasResumo] = await Database.rawQuery(
+      ` select count(*) as qnt, id_produto, nome 
+        from pedidos_itens 
+        join produtos on produtos.id = id_produto
+        group by id_produto
+        order by qnt desc
+        limit 1;
+    `);
+
+    response.status(200).json({
+      pedidos: linhasValor[0],
+      produto: linhasResumo?.length != 0? linhasResumo[0] : null
+    })
+  }
+
   public async index({ response }: HttpContextContract) {
     const pedidos = await Pedido.query().preload('itens').paginate(1, 100)
     response.status(202).json(pedidos.toJSON())

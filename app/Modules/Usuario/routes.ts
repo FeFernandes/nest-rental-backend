@@ -2,6 +2,7 @@ import Route from '@ioc:Adonis/Core/Route'
 
 Route.group(() => {
   Route.group(() => {
+    Route.get('/total', 'UsuariosController.total')
     Route.post('/', 'UsuariosController.create')
     Route.get('/', 'UsuariosController.index')
     Route.get('/:id', 'UsuariosController.show')
