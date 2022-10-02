@@ -4,6 +4,7 @@ import ShowValidator from 'App/Validators/Produtos/ShowValidator'
 import DeleteValidator from 'App/Validators/Produtos/DeleteValidator'
 import EditValidator from 'App/Validators/Produtos/EditValidator'
 import Produto from 'App/Models/Produto'
+import Database from '@ioc:Adonis/Lucid/Database'
 
 export default class ProdutosController {
   public async index({ response }: HttpContextContract) {
@@ -75,5 +76,32 @@ export default class ProdutosController {
     } catch (error) {
       response.badRequest(error.messages)
     }
+  }
+
+
+
+
+
+
+
+  /* Marca (deveria ter um módulo exclusivo) */
+
+  public async marca_create({ response, request }: HttpContextContract) {
+    const { nome, identificador } = request.all();
+    const info = await Database.rawQuery("insert into marca(nome, identificador) values(?, ?)", [nome, identificador]);
+    response.status(201);
+  }
+
+  public async marca_index({ response }: HttpContextContract) {
+    const [rows] = await Database.rawQuery("select * from marca");
+    response.json(rows);
+  }
+
+  public async marca_edit({ response, request }: HttpContextContract) {
+    const { nome, identificador } = request.all();
+    const { id } = request.params();
+
+    const info = await Database.rawQuery("update marca set nome = ?, identificador =? where id = ?", [nome, identificador, id]);
+    response.status(200);
   }
 }
