@@ -13,7 +13,7 @@ export default class ProdutosController {
   }
   public async show({ response, request }: HttpContextContract) {
     const payload = await request.validate(ShowValidator)
-    const social = await Produto.findBy(payload.params.id)
+    const social = await Produto.findBy("id", payload.params.id)
 
     if (social) {
       response.status(202).json({
