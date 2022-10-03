@@ -114,7 +114,7 @@ export default class UsuariosController {
         await entidade.delete()
       }
     }
-  }
+  } 
 
   public async login({ response, request, auth }: HttpContextContract) {
     const {login, password} = request.all();
