@@ -131,13 +131,16 @@ export default class UsuariosController {
 
     // response.json(token);
 
-
+    const entidade = await Entidade.find(user.id)
     const payload = await request.validate(LoginValidator)
     // const user = await Usuario.findBy('login', payload.login)
     delete user.password
     const result = await auth.use('jwt').login(user, payload)
     const jwt = await auth.use('jwt').generate(user)
-    response.status(200).json({ jwt, user })
+    response.status(200).json({ jwt, user: {
+      ...user,
+      name: entidade.nome
+    } })
 
   }
 }
