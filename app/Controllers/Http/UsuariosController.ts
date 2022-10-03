@@ -140,6 +140,7 @@ export default class UsuariosController {
     console.log(entidade)
     response.status(200).json({ jwt, user: {
       ...user.$attributes,
+      ...entidade.$attributes,
       name: entidade? entidade.$attributes.nome : ''
     } })
 
